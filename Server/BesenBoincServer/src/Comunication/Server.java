@@ -10,7 +10,6 @@ import java.util.concurrent.Executors;
 
 import Comunication.Client.PacketHandler;
 import Comunication.Data.ContentType;
-import Core.BB;
 import Core.Program;
 import Job.Result;
 
@@ -33,10 +32,9 @@ public class Server implements PacketHandler {
 		return server;
 	}
 
-	public Server open() {
+	public Server open(int port) {
 		try {
-			accept_new_connections = true;
-			ssoc = new ServerSocket(BB.port);
+			ssoc = new ServerSocket(port);
 			serverthread = new Thread(new Runnable() {
 				@Override
 				public void run() {
@@ -56,7 +54,8 @@ public class Server implements PacketHandler {
 				}
 			}, "Serverthread");
 			serverthread.start();
-			System.out.println("Server is Listening on port " + BB.port);
+			accept_new_connections = true;
+			System.out.println("Server is Listening on port " + port);
 			
 			programthread = new Thread(prog, "Programm Thread");
 			programthread.start();

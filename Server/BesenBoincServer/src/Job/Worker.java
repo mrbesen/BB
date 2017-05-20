@@ -3,6 +3,8 @@ package Job;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -64,7 +66,9 @@ public class Worker implements PacketHandler, Runnable{
 		try {
 			File classfile = new File(j.classname+".class");//remove class file
 			if(classfile.exists())
-				classfile.delete();					
+				classfile.delete();
+			
+			System.out.println("File: " + classfile.getAbsolutePath());
 
 			/*	System.out.println("Writing file size:" + j.code.length());
 			FileWriter fw = new FileWriter(classfile);//file writing
@@ -75,8 +79,18 @@ public class Worker implements PacketHandler, Runnable{
 			fos.write(j.classfile);
 			fos.close();
 			
-			r = ((Jobsrc) Class.forName(j.classname).newInstance()).run();//load & run
+			//r = ((Jobsrc) Class.forName(j.classname).newInstance()).run();//load & run
+			String path = classfile.getAbsolutePath();
+			path = "file://" + path.substring(0, path.lastIndexOf(File.separator)+1);//remove file name
+			URL[] url = {new URL(path)};
+			URLClassLoader cl = new URLClassLoader(url);
+			r = ((Jobsrc) cl.loadClass(j.classname).newInstance()).run();
+			cl.close();
+			
 			//unload?
+			Runtime.getRuntime().gc();//hopefully delete loader
+			//should unload because the loader is in the gc
+			
 			
 			if(classfile.exists())
 				classfile.delete();
@@ -104,7 +118,7 @@ public class Worker implements PacketHandler, Runnable{
 	}
 
 	private void requestnewjob() {
-		if((System.currentTimeMillis()-lastasked) > 1500 & run & client.hasConnection()) {//request wenn letster unerfolg reicher lange genug her ist (Server nicht nerven)
+		if((System.currentTimeMillis()-lastasked) > 15 & run & client.hasConnection()) {//request wenn letster unerfolg reicher lange genug her ist (Server nicht nerven)
 			client.send(new Data("nextplease"));
 //			System.out.println("asked for next job");
 			lastasked = System.currentTimeMillis();

@@ -7,7 +7,8 @@ public class Starter {
 
 	public static void main(String args[]) {
 		System.out.println("Starting BesenBoincClient...");
-
+		System.out.println("user.dir: " + System.getProperty("user.dir"));
+		
 		String host = BB.host;
 		int port = BB.port;
 		if(args.length >= 1) {
@@ -47,8 +48,6 @@ public class Starter {
 			lasttest = System.currentTimeMillis();
 			try {
 				Client c = new Client(host, port, new Worker());
-				
-				System.out.println("Connection Established.");
 				
 				c.run();
 				

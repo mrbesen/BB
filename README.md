@@ -10,7 +10,7 @@ Host defaults to "127.0.0.1" and port default to "5454".
 
 ctl + c to stop
 
-##Start a Server
+## Start a Server
 ```
 java -jar Server.jar [classname]
 ```

@@ -164,4 +164,9 @@ public class JobManager implements Iterator<Job>{
 			getnewThread().start();
 		}
 	}
+
+	
+	public boolean isCompiling() {
+		return isCompiling;
+	}
 }

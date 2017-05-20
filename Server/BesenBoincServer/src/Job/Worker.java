@@ -36,7 +36,9 @@ public class Worker implements PacketHandler, Runnable{
 			while(!client.hasConnection()) {//waiting for connection
 				Thread.sleep(500);
 			}
-		} catch(Exception e) {}
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
 		while (run) {
 			if(jobs.size()>0) {
 				Result r = justrun(jobs.get(0));

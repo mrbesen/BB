@@ -71,9 +71,6 @@ public class Client implements Runnable{
 			try {
 				handler.HandleData((Data) in.readObject(), this);
 				//				System.out.println("Recived data!");
-			} catch(NullPointerException|SocketException|EOFException e) {
-				e.printStackTrace();
-				disconnect();
 			} catch (Exception e) {
 				e.printStackTrace();
 				disconnect();

@@ -29,7 +29,7 @@ public class JobManager implements Iterator<Job>{
 		update();
 	}
 	
-	public Thread getnewThread() {
+	private Thread getnewThread() {
 		return new Thread(new Runnable() {
 			@Override
 			public void run() {
@@ -155,9 +155,7 @@ public class JobManager implements Iterator<Job>{
 	
 	public int jobs_compiledtarget() {
 		int w = 7 * Server.getServer().getConnectionCount();
-		if(w < 10)
-			w = 10;
-		return w;
+		return (w < 10) ? 10 : w;
 	}
 
 	private void startCompile() {

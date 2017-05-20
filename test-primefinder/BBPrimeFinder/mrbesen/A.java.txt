@@ -1,0 +1,18 @@
+import Job.Jobsrc;
+import Job.Result;
+import Job.Result.ResultType;
+public class A extends Jobsrc{
+	double num = 2;
+	@Override
+	public Result run() {
+		Result r = new Result();
+		for(double test = num; test < num + 200; test = test +2) {
+			for(double i = 2; i * i <= test+2; i++) {
+				if(test%i == 0)
+					r.add(r.new PartialResult(ResultType.Value, test + "|" + false));
+			}
+			r.add(r.new PartialResult(ResultType.Value, test + "|" + true));
+		}
+		return r;
+	}
+}

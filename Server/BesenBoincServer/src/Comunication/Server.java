@@ -60,7 +60,6 @@ public class Server implements PacketHandler {
 			programthread = new Thread(prog, "Programm Thread");
 			programthread.start();
 			System.out.println("Programm execution started");
-			
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -96,7 +95,6 @@ public class Server implements PacketHandler {
 		try {
 			ssoc.close();//close server socket
 			ssoc = null;
-			Runtime.getRuntime().gc();//delete ssoc
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

@@ -10,15 +10,23 @@ import java.util.List;
 import java.util.Scanner;
 
 import Comunication.Server;
+import Core.Program;
 import Utils.StringUtils;
 
 public class JobManager implements Iterator<Job>{
 
 	private List<Job> enqued = new ArrayList<Job>();//enqued jobs
 	private List<Job> todo = new ArrayList<Job>();//compiled jobs
+	private List<Job> send = new ArrayList<Job>();//assigned jobs
 	private List<Job> done = new ArrayList<Job>();//done jobs
 
-	int jobcount = 0;
+	private int jobcount = 0;
+	
+	private Program prog;
+	
+	public JobManager(Program prog) {
+		this.prog = prog;
+	}
 
 	private boolean isCompiling = false;
 
@@ -35,7 +43,7 @@ public class JobManager implements Iterator<Job>{
 			public void run() {
 				isCompiling = true;//doppelt hält besser
 //				System.out.println("Compilingque started!");
-				while(enqued.size() > 0 & todo.size() < 15) {
+				while(enqued.size() > 0 & todo.size() < 15 & isCompiling) {
 					Job j = enqued.get(0);
 					//compile script
 					try {
@@ -63,28 +71,6 @@ public class JobManager implements Iterator<Job>{
 						scan.close();
 						process.waitFor();
 
-						/*BufferedReader br = new BufferedReader(new FileReader(classfile));//save the file to the String
-						String line = null;
-						StringBuilder strb = new StringBuilder();
-						String linesep = System.getProperty("line.seperator");
-						String out = "";
-
-						while((line= br.readLine()) != null) {
-							out += (line + linesep);
-						}
-
-						j.code = out;*/
-						/*
-						Scanner scanner = new Scanner(classfile);
-						j.code = "";
-						String out = "";
-						while(scanner.hasNext()) {
-							out = out + scanner.next();
-						}
-						scanner.close();
-						j.code = out;
-						System.out.println("File Readed size: " + j.code.length() + " " + out.length());
-						*/
 						
 						RandomAccessFile f = new RandomAccessFile(classfile, "r");
 						j.classfile = new byte[(int)f.length()];
@@ -122,10 +108,11 @@ public class JobManager implements Iterator<Job>{
 
 	@Override
 	public Job next() {
-		done.add(todo.get(0));
+		send.add(todo.get(0));
 		todo.remove(0);
 		update();
-		return done.get(done.size()-1);
+		System.out.println("" + ((int) (((float) done.size()) / ((float)jobs_total()))*100) + "% Done");
+		return send.get(send.size()-1);
 	}
 
 	@Override
@@ -136,11 +123,18 @@ public class JobManager implements Iterator<Job>{
 	public void update() {//called from Server on new Client Connection 
 		if(enqued.size() > 0 & !isCompiling & todo.size() < jobs_compiledtarget()) {//7 für jede connection vorrätig
 			startCompile();
+		} else if(enqued.size() < jobs_compiledtarget()) {
+			System.out.println("All jobs done.");
+			prog.requestnewjobs(jobs_compiledtarget() * 15);//mal nen par generieren
 		}
 	}
 	
 	public int jobs_done() {
 		return done.size();
+	}
+	
+	public int jobs_send() {
+		return send.size();
 	}
 	
 	public int jobs_compiled() {
@@ -165,8 +159,46 @@ public class JobManager implements Iterator<Job>{
 		}
 	}
 
+	/**
+	 * Drop all jobs
+	 */
+	public void clear() {
+		//posible bug: when the Compiler is running, an then the que is cleared, its posible that the compiler adds a job.
+		//work around: add a wait, or save the Thread object and wait for it
+		isCompiling = false;
+		enqued.clear();
+		done.clear();
+		send.clear();
+		todo.clear();
+		jobcount = 0;
+	}
 	
 	public boolean isCompiling() {
 		return isCompiling;
+	}
+
+	
+	/**
+	 * Mark a job as done
+	 * @param jobId
+	 */
+	public void setdone(int jobId) {
+		//find yob
+		Job j = null;
+		int pos = -1;
+		for(int i = 0; i < send.size(); i++) {
+			if(send.get(i).getId() == jobId) {
+				j = send.get(i);
+				pos = i;
+				break;
+			}
+		}
+		
+		if(j != null) {
+			send.remove(pos);
+			done.add(j);
+		} else {
+			System.out.println("Job id " + jobId + " not found");
+		}
 	}
 }

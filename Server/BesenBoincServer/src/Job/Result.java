@@ -14,6 +14,10 @@ public class Result implements Serializable{
 	private List<PartialResult> list = new ArrayList<PartialResult>();
 	private int jobid;
 	
+	public Result(int job) {
+		jobid = job;
+	}
+	
 	public void OutputConsole(String out) {
 		list.add(new PartialResult(ResultType.Console, out));
 	}

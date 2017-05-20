@@ -22,7 +22,7 @@ public class Job implements Serializable{
 	
 	public void setId(int id) {
 		this.id = id;
-//		code.replace("[[Jobid]]",""+ id);
+//		code.replace(Pattern.quote("§JOBID§"),""+ id);
 	}
 	
 	public int getId() {

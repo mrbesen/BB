@@ -14,4 +14,7 @@ public class Test extends Program {
 
 	@Override
 	public void HandlePartialResult(PartialResult pres) {}//unused
+
+	@Override
+	public void requestnewjobs(int amount) {}
 }

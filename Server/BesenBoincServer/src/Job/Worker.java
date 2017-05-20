@@ -43,7 +43,9 @@ public class Worker implements PacketHandler, Runnable{
 		}
 		while (run) {
 			if(jobs.size()>0) {
+				System.out.print("Executing Job: " + jobs.get(0).getId());
 				Result r = justrun(jobs.get(0));
+				System.out.println("Done.");
 				if(r != null) {
 					client.send(new Data(r));
 					jobs.remove(0);
@@ -52,6 +54,7 @@ public class Worker implements PacketHandler, Runnable{
 					System.err.println("Result ist null!");
 				}
 			} else {//derzeit kein job in petto
+				System.out.println("Idle");
 				try {
 					Thread.sleep(200);
 					requestnewjob();
@@ -61,20 +64,12 @@ public class Worker implements PacketHandler, Runnable{
 	}
 
 	private Result justrun(Job j) {
-//		System.out.println("recived code:" + srccode);
 		Result r = null;
 		try {
 			File classfile = new File(j.classname+".class");//remove class file
 			if(classfile.exists())
 				classfile.delete();
-			
-			System.out.println("File: " + classfile.getAbsolutePath());
 
-			/*	System.out.println("Writing file size:" + j.code.length());
-			FileWriter fw = new FileWriter(classfile);//file writing
-			fw.write(j.code);
-			fw.close();
-		 	*/
 			FileOutputStream fos = new FileOutputStream(classfile);
 			fos.write(j.classfile);
 			fos.close();

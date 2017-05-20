@@ -97,4 +97,7 @@ public class PrimeFinder extends Program {
 			}
 	}
 
+	
+	@Override
+	public void requestnewjobs(int amount) {}
 }

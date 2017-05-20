@@ -47,11 +47,10 @@ public class Starter {
 			lasttest = System.currentTimeMillis();
 			try {
 				Client c = new Client(host, port, new Worker());
-				Thread client = new Thread(c, "Connection");
-				client.start();
 				
-				while(client.isAlive())
-					;
+				System.out.println("Connection Established.");
+				
+				c.run();
 				
 				if(lost_counter > 0) {
 					int minus = (int) ((System.currentTimeMillis()-lasttest)/10000);//für alle 10 sekunden verbinung ein lost count weniger

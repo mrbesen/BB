@@ -21,8 +21,8 @@ public class Worker implements PacketHandler, Runnable{
 	private Client client; 
 	private long lastasked = System.currentTimeMillis();
 	private boolean run = true;
-
-	public Worker() {
+	
+	public void start() {
 		Thread workerthread = new Thread(this, "Worker");
 		workerthread.start();
 	}
@@ -45,7 +45,7 @@ public class Worker implements PacketHandler, Runnable{
 			if(jobs.size()>0) {
 				System.out.print("Executing Job: " + jobs.get(0).getId());
 				Result r = justrun(jobs.get(0));
-				System.out.println("Done.");
+				System.out.println(" Done.");
 				if(r != null) {
 					client.send(new Data(r));
 					jobs.remove(0);

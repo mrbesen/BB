@@ -1,5 +1,7 @@
 package Core;
 
+import java.io.IOException;
+
 import Comunication.Client;
 import Job.Worker;
 
@@ -7,8 +9,8 @@ public class Starter {
 
 	public static void main(String args[]) {
 		System.out.println("Starting BesenBoincClient...");
-		System.out.println("user.dir: " + System.getProperty("user.dir"));
 		
+		//parsing Arguments
 		String host = BB.host;
 		int port = BB.port;
 		if(args.length >= 1) {
@@ -20,8 +22,10 @@ public class Starter {
 				}
 			}
 		}
+	
+		//try to connect
 		boolean run = true;
-		int lost_counter = 0;//ho often loast?
+		int lost_counter = 0;//how often lost. - higher value - longer wait time until reconnect is tried.
 		long lasttest = -1;
 		while(run) {
 			boolean tryagain = false;
@@ -39,17 +43,25 @@ public class Starter {
 				}
 
 				try {
-					Thread.yield();
 					Thread.sleep(500);
-				} catch(Exception e) {}
+				} catch(InterruptedException e) {}
 			}
-
-			System.out.println("Connecting to " + host + " on port: " + port);
+			
+			//try to connect
+			System.out.print("Connecting to " + host + " on port: " + port + " ");
 			lasttest = System.currentTimeMillis();
 			try {
-				Client c = new Client(host, port, new Worker());
+				Worker worker = new Worker();
+				Client c;
+				try {
+					c = new Client(host, port, worker);//throws IOException on failed connection
+				} catch (IOException e) {
+					System.out.println("Failed");
+					throw new Exception(e);//do not print stack trace
+				}
 				
-				c.run();
+				worker.start();//start worker Thread, only if connection is established
+				c.run();//manage connection
 				
 				if(lost_counter > 0) {
 					int minus = (int) ((System.currentTimeMillis()-lasttest)/10000);//für alle 10 sekunden verbinung ein lost count weniger
@@ -58,11 +70,14 @@ public class Starter {
 					else
 						lost_counter -= minus;
 				}
+				System.out.println("Connection Lost!");
+				worker.stop();
+			} catch(IOException e) {
+				e.printStackTrace();
 			} catch(Exception e) {
 				//failed
 				lost_counter++;
 			}
-			System.out.println("Connection LOST!");
 		}
 	}
 }

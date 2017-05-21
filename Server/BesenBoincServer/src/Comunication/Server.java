@@ -57,7 +57,13 @@ public class Server implements PacketHandler {
 			accept_new_connections = true;
 			System.out.println("Server is Listening on port " + port);
 			
-			programthread = new Thread(prog, "Programm Thread");
+			programthread = new Thread(new Runnable() {
+				@Override
+				public void run() {
+					prog.run();
+					System.out.println("Program enqued " + prog.jobmanager.jobs_total() + " Jobs.");
+				}
+			}, "Programm Thread");
 			programthread.start();
 			System.out.println("Programm execution started");
 		} catch (IOException e) {

@@ -5,7 +5,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.net.UnknownHostException;
 
 public class Client implements Runnable{
 	private Socket soc;
@@ -22,7 +21,7 @@ public class Client implements Runnable{
 		getStreams();
 	}
 
-	public Client(String addr, int port, PacketHandler hand) throws UnknownHostException, IOException {//client side constructor
+	public Client(String addr, int port, PacketHandler hand) throws IOException {//client side constructor
 		hold_connection = true;
 		handler = hand;
 		soc = new Socket(InetAddress.getByName(addr), port);//connect

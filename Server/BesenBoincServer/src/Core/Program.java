@@ -6,7 +6,7 @@ import Job.Result.PartialResult;
 
 public abstract class Program implements Runnable{
 
-	public JobManager jobmanager = new JobManager(this);
+	public JobManager jobmanager = new JobManager();
 	
 	public void HandleResult(Result r) {
 		jobmanager.setdone(r.getJobId());
@@ -21,6 +21,4 @@ public abstract class Program implements Runnable{
 	}
 	
 	public abstract void HandlePartialResult(PartialResult pres);
-
-	public abstract void requestnewjobs(int amount);
 }

@@ -96,8 +96,4 @@ public class PrimeFinder extends Program {
 				e.printStackTrace();
 			}
 	}
-
-	
-	@Override
-	public void requestnewjobs(int amount) {}
 }

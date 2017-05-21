@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Scanner;
 
 import Comunication.Server;
-import Core.Program;
 import Utils.StringUtils;
 
 public class JobManager implements Iterator<Job>{
@@ -21,19 +20,13 @@ public class JobManager implements Iterator<Job>{
 	private List<Job> done = new ArrayList<Job>();//done jobs
 
 	private int jobcount = 0;
-	
-	private Program prog;
-	
-	public JobManager(Program prog) {
-		this.prog = prog;
-	}
 
 	private boolean isCompiling = false;
 
 	public void enque(Job newjob) {
+		jobcount++;
 		newjob.setId(jobcount);
 		enqued.add(newjob);
-		jobcount++;
 		update();
 	}
 	
@@ -123,9 +116,6 @@ public class JobManager implements Iterator<Job>{
 	public void update() {//called from Server on new Client Connection 
 		if(enqued.size() > 0 & !isCompiling & todo.size() < jobs_compiledtarget()) {//7 für jede connection vorrätig
 			startCompile();
-		} else if(enqued.size() < jobs_compiledtarget()) {
-			System.out.println("All jobs done.");
-			prog.requestnewjobs(jobs_compiledtarget() * 15);//mal nen par generieren
 		}
 	}
 	

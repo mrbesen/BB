@@ -23,6 +23,12 @@ public class JobManager implements Iterator<Job>{
 
 	private boolean isCompiling = false;
 
+	public void reenque(List<Job> jobs) {
+		todo.addAll(0, jobs);
+		send.removeAll(jobs);
+		update();
+	}
+	
 	public void enque(Job newjob) {
 		jobcount++;
 		newjob.setId(jobcount);
@@ -30,6 +36,10 @@ public class JobManager implements Iterator<Job>{
 		update();
 	}
 	
+	/**
+	 * Creates a new Compiling Thread
+	 * @return
+	 */
 	private Thread getnewThread() {
 		return new Thread(new Runnable() {
 			@Override
@@ -94,6 +104,9 @@ public class JobManager implements Iterator<Job>{
 		}, "Compiler");
 	}
 
+	/**
+	 * is a new Compiled job in the list
+	 */
 	@Override
 	public boolean hasNext() {
 		return todo.size() != 0;
@@ -106,11 +119,6 @@ public class JobManager implements Iterator<Job>{
 		update();
 		System.out.println("" + ((int) (((float) done.size()) / ((float)jobs_total()))*100) + "% Done");
 		return send.get(send.size()-1);
-	}
-
-	@Override
-	public void remove() {//unused
-
 	}
 
 	public void update() {//called from Server on new Client Connection 
@@ -137,6 +145,10 @@ public class JobManager implements Iterator<Job>{
 		return jobcount;
 	}
 	
+	/**
+	 * How many Jobs should stored compiled?
+	 * @return 7 Jobs for every Connection, and at least 10.
+	 */
 	public int jobs_compiledtarget() {
 		int w = 7 * Server.getServer().getConnectionCount();
 		return (w < 10) ? 10 : w;

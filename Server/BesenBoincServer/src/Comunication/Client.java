@@ -5,6 +5,11 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.util.LinkedList;
+import java.util.List;
+
+import Comunication.Data.ContentType;
+import Job.Job;
 
 public class Client implements Runnable{
 	private Socket soc;
@@ -13,6 +18,8 @@ public class Client implements Runnable{
 
 	private PacketHandler handler;
 	private boolean hold_connection;
+	
+	private List<Job> takenjobs = new LinkedList<Job>();
 
 	public Client(Socket soc, PacketHandler hand) {//server side constructor
 		hold_connection = true;
@@ -43,6 +50,9 @@ public class Client implements Runnable{
 			try {
 				out.writeObject(data);
 				out.flush();
+				if(data.type == ContentType.Job) {
+					takenjobs.add((Job) data.content);
+				}
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -56,6 +66,9 @@ public class Client implements Runnable{
 			out.close();
 			soc.close();
 			System.out.println("Disconnected!");
+			//re-enque all take jobs
+			Server.getServer().getProgram().jobmanager.reenque(takenjobs);
+			takenjobs.clear();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -74,6 +87,15 @@ public class Client implements Runnable{
 			}
 		}
 		disconnect();
+	}
+	
+	void removetakenjob(int jobid) {
+		for(int i = 0; i < takenjobs.size(); i++) {
+			if(takenjobs.get(i).getId() == jobid) {
+				takenjobs.remove(i);
+				break;
+			}
+		}
 	}
 
 	public boolean hasConnection() {

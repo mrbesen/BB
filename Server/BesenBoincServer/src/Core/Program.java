@@ -4,7 +4,7 @@ import Job.JobManager;
 import Job.Result;
 import Job.Result.PartialResult;
 
-public abstract class Program implements Runnable{
+public abstract class Program implements Runnable {
 
 	public JobManager jobmanager = new JobManager();
 	

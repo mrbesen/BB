@@ -119,9 +119,11 @@ public class Server implements PacketHandler {
 				} else {
 					System.out.println("Out of Tasks");
 				}
-			}
+			} 
 		} else if(data.type == ContentType.Result) {
-			prog.HandleResult((Result) data.content);
+			Result r = (Result) data.content;
+			c.removetakenjob(r.getJobId());
+			prog.HandleResult(r);
 		}else
 			System.out.println("unhandled Data!");
 	}

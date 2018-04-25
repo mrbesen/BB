@@ -53,7 +53,7 @@ public class Starter {
 				Server.getServer().close();
 				run = false;
 			} else if(in.equalsIgnoreCase("stats")) {
-				JobManager jm = server.getProgram().jobmanager;
+				JobManager jm = server.getProgram().getJobManager();
 				System.out.println("\nStats:\nTasks done    : " + jm.jobs_done() + "\nTasks send    : " + jm.jobs_send() + "\nTasks compiled: " + jm.jobs_compiled() + "/" + jm.jobs_compiledtarget() + "\nCurrently Compiling: " + jm.isCompiling() + "\nTasks enqued  : " + jm.jobs_enqued() + "\n--------------------\ntotal         : " + jm.jobs_total()+ "\nConnections: " + server.getConnectionCount());
 			} else {
 				System.out.println("unknown Command.");

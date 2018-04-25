@@ -15,14 +15,13 @@ import Job.Result.PartialResult;
 public class PrimeFinder extends Program {
 
 	List<Double> primes = new ArrayList<Double>();
-	double count = -1;
+	double count = -1;//current prime
 	File file = new File("primes");
 
 	int save_count;//to save every 20 times
 	int save_intervall = 100;
 
-	@Override
-	public void run() {
+	public PrimeFinder() {
 		//load primes	
 		try {
 			if(file.exists()) {
@@ -51,7 +50,7 @@ public class PrimeFinder extends Program {
 			count = primes.get(primes.size()-1)+1;
 
 		String insert = PrimetoString(count);
-		jobmanager.enque(new Job("import Job.Jobsrc;\nimport Job.Result;\nimport Job.Result.ResultType;\npublic class A" + insert + " extends Jobsrc{\n	double num = " + insert + ";\n	@Override\n	public Result run() {\n		Result r = new Result();\n		for(double test = num; test < num + 200; test = test +2) {\n			for(double i = 2; i * i <= test+2; i++) {\n				if(test%i == 0)\n					r.add(r.new PartialResult(ResultType.Value, test + \"|\" + false));\n			}\n			r.add(r.new PartialResult(ResultType.Value, test + \"|\" + true));\n		}\n		return r;\n	}\n}") );
+		getJobManager().enque(new Job("import Job.Jobsrc;\nimport Job.Result;\nimport Job.Result.ResultType;\npublic class A" + insert + " extends Jobsrc{\n	double num = " + insert + ";\n	@Override\n	public Result run() {\n		Result r = new Result();\n		for(double test = num; test < num + 200; test = test +2) {\n			for(double i = 2; i * i <= test+2; i++) {\n				if(test%i == 0)\n					r.add(r.new PartialResult(ResultType.Value, test + \"|\" + false));\n			}\n			r.add(r.new PartialResult(ResultType.Value, test + \"|\" + true));\n		}\n		return r;\n	}\n}"), false);
 		count+= 200;
 	}
 
@@ -67,11 +66,9 @@ public class PrimeFinder extends Program {
 		fw.close();
 		System.out.println("Primes saved");
 	}
-	
+
 	private String PrimetoString(double prime) {
-		String out = prime + "";
-		out = out.substring(0,out.length()-2);
-		return out;
+		return ((int) prime) / 100 + "";
 	}
 
 	@Override
@@ -87,7 +84,7 @@ public class PrimeFinder extends Program {
 				primes.add(Double.parseDouble(split[0]));
 			}
 		}
-		
+
 		save_count++;
 		if(save_count >=save_intervall)
 			try {
@@ -95,5 +92,12 @@ public class PrimeFinder extends Program {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+	}
+
+
+	@Override
+	public boolean enquenextJob() {
+		checkforprime();
+		return true;
 	}
 }

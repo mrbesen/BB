@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Scanner;
 
 import Comunication.Server;
+import Core.Program;
 import Utils.StringUtils;
 
 public class JobManager implements Iterator<Job>{
@@ -19,9 +20,14 @@ public class JobManager implements Iterator<Job>{
 	private List<Job> send = new ArrayList<Job>();//assigned jobs
 	private List<Job> done = new ArrayList<Job>();//done jobs
 
+	private Program prog;
 	private int jobcount = 0;
 
 	private boolean isCompiling = false;
+
+	public JobManager(Program program) {
+		prog = program;
+	}
 
 	public void reenque(List<Job> jobs) {
 		todo.addAll(0, jobs);
@@ -29,10 +35,13 @@ public class JobManager implements Iterator<Job>{
 		update();
 	}
 	
-	public void enque(Job newjob) {
+	public void enque(Job newjob, boolean isPreCompiled) {
 		jobcount++;
 		newjob.setId(jobcount);
-		enqued.add(newjob);
+		if(isPreCompiled)
+			todo.add(newjob);
+		else
+			enqued.add(newjob);
 		update();
 	}
 	
@@ -45,9 +54,13 @@ public class JobManager implements Iterator<Job>{
 			@Override
 			public void run() {
 				isCompiling = true;//doppelt hält besser
-//				System.out.println("Compilingque started!");
-				while(enqued.size() > 0 & todo.size() < 15 & isCompiling) {
+				//compile them!
+				while(enqued.size() > 0 && todo.size() < jobs_compiledtarget() && isCompiling) {
 					Job j = enqued.get(0);
+					if(j == null) {
+						System.out.println("enqued.size(): " + enqued.size() + " but job.get(0) is null!");
+						break;
+					}
 					//compile script
 					try {
 						//					System.out.println(j.code);
@@ -86,20 +99,17 @@ public class JobManager implements Iterator<Job>{
 						enqued.remove(0);//manage ques
 						todo.add(j);
 
-						//br.close();
-
 						if(classfile.exists())//delete all files
 							classfile.delete();
 						if (file.exists())
 							file.delete();
 
-//						System.out.println("Compile done.");
 					} catch(IOException | InterruptedException e) {
 						e.printStackTrace();
 					}
 				}
 				isCompiling = false;
-//				System.out.println("Compiling que Stopped!");
+//				System.out.println("Compiler stopped!");
 			}
 		}, "Compiler");
 	}
@@ -109,20 +119,36 @@ public class JobManager implements Iterator<Job>{
 	 */
 	@Override
 	public boolean hasNext() {
-		return todo.size() != 0;
+		if(todo.size() == 0) {
+			update();
+			return false;
+		}
+		return true;
 	}
 
 	@Override
 	public Job next() {
+		//Warning! not checked if todo.get(0) exists!
 		send.add(todo.get(0));
 		todo.remove(0);
 		update();
-		System.out.println("" + ((int) (((float) done.size()) / ((float)jobs_total()))*100) + "% Done");
+		System.out.println(((int) (((float) done.size()) / ((float)jobs_total()))*100) + "% Done");
 		return send.get(send.size()-1);
 	}
 
-	public void update() {//called from Server on new Client Connection 
-		if(enqued.size() > 0 & !isCompiling & todo.size() < jobs_compiledtarget()) {//7 für jede connection vorrätig
+	/**
+	 * Called, when the job-lists get modified or a new client connects.
+	 * This method simply checks weather the compiler-thread should be started or not.
+	 * If the Thread should be started, this method does it with no further instruction.
+	 */
+	public void update() {
+		boolean hasnext = true;//variable zum testen, ob das Programm weitere Jobs hat
+		while(enqued.size() + todo.size() < jobs_compiledtarget() && (hasnext = prog.enquenextJob()));//genarte new jobs!
+		if(!hasnext) {
+			System.out.println("Program has no new Jobs!");
+			//TODO: somehow stop the compile thread after compiling (and disable it from re-opening) and set a flag, that after these jobs are done the server could shutdown.
+		}
+		if(enqued.size() > 0 && !isCompiling && todo.size() < jobs_compiledtarget()) {//7 jobs for each connection and at least 10
 			startCompile();
 		}
 	}
@@ -185,7 +211,7 @@ public class JobManager implements Iterator<Job>{
 	 * @param jobId
 	 */
 	public void setdone(int jobId) {
-		//find yob
+		//find job
 		Job j = null;
 		int pos = -1;
 		for(int i = 0; i < send.size(); i++) {
@@ -199,6 +225,7 @@ public class JobManager implements Iterator<Job>{
 		if(j != null) {
 			send.remove(pos);
 			done.add(j);
+			//TODO: delete old done jobs, to preverse Memory?
 		} else {
 			System.out.println("Job id " + jobId + " not found");
 		}

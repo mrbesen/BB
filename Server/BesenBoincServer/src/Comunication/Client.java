@@ -67,7 +67,7 @@ public class Client implements Runnable{
 			soc.close();
 			System.out.println("Disconnected!");
 			//re-enque all take jobs
-			Server.getServer().getProgram().jobmanager.reenque(takenjobs);
+			Server.getServer().getProgram().getJobManager().reenque(takenjobs);
 			takenjobs.clear();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -76,13 +76,14 @@ public class Client implements Runnable{
 
 	@Override
 	public void run() {
-		while(!soc.isClosed() & hold_connection) {
+		while(!soc.isClosed() && hold_connection) {
 			//handle data
 			try {
 				handler.HandleData((Data) in.readObject(), this);
 				//				System.out.println("Recived data!");
 			} catch (Exception e) {
-				e.printStackTrace();
+//				e.printStackTrace();
+				System.err.println("Error while reciving! Disconnecting Client: " + soc.getInetAddress() );
 				disconnect();
 			}
 		}

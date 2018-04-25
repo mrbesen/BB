@@ -46,7 +46,7 @@ public class Server implements PacketHandler {
 							connections.add(c);
 							execution.submit(c);
 							c.send(new Data("welcomme"));
-							prog.jobmanager.update();
+							prog.getJobManager().update();
 						} catch (IOException e) {
 							e.printStackTrace();
 						}
@@ -60,8 +60,8 @@ public class Server implements PacketHandler {
 			programthread = new Thread(new Runnable() {
 				@Override
 				public void run() {
-					prog.run();
-					System.out.println("Program enqued " + prog.jobmanager.jobs_total() + " Jobs.");
+					for(int i = 0; i < 15 && prog.enquenextJob(); i++);//enque 15 start jobs
+					System.out.println("Program enqued " + prog.getJobManager().jobs_total() + " Jobs.");
 				}
 			}, "Programm Thread");
 			programthread.start();
@@ -114,8 +114,8 @@ public class Server implements PacketHandler {
 				c.send(new Data("pingback"));
 //				System.out.println("Pinged, pining back...");
 			} else if(info.equalsIgnoreCase("nextplease")) {
-				if(prog.jobmanager.hasNext()) {
-					c.send(new Data(prog.jobmanager.next(),ContentType.Job));
+				if(prog.getJobManager().hasNext()) {
+					c.send(new Data(prog.getJobManager().next(),ContentType.Job));
 				} else {
 					System.out.println("Out of Tasks");
 				}

@@ -95,6 +95,7 @@ public class JobManager implements Iterator<Job>{
 
 						j.compiled = true;
 						j.classname = classname;
+						j.code = null;
 						
 						enqued.remove(0);//manage ques
 						todo.add(j);
@@ -225,6 +226,8 @@ public class JobManager implements Iterator<Job>{
 		if(j != null) {
 			send.remove(pos);
 			done.add(j);
+			j.classfile = null;
+
 			//TODO: delete old done jobs, to preverse Memory?
 		} else {
 			System.out.println("Job id " + jobId + " not found");
